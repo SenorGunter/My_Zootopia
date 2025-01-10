@@ -1,4 +1,4 @@
-from animal_api import api_data_load
+from data_fetcher import api_data_load, get_animals_data
 
 
 # def load_data(file_path):
@@ -11,35 +11,6 @@ def load_html_template(file_path):
     """ Loads HTML file """
     with open(file_path, "r") as fileobj:
         return fileobj.read()
-
-
-def get_animals_data(animal, skin_type):
-    """ Returns a dictionary with the relevant data for each animal """
-    full_animals_data = api_data_load(animal)
-
-    animals_data = {}
-    for animal in full_animals_data:
-        try:
-            animal_skin_type = animal["characteristics"]["skin_type"]
-        except KeyError:
-            animal_skin_type = "not specified"
-
-        if skin_type != animal_skin_type and skin_type != "All":
-            continue
-
-        animal_data = {}
-        animal_data["taxonomy"] = " - ".join(animal["taxonomy"].values())
-        if "characteristics" in animal:
-            if "diet" in animal["characteristics"]:
-                animal_data["Diet"] = animal["characteristics"]["diet"]
-            if "type" in animal["characteristics"]:
-                animal_data["Type"] = animal["characteristics"]["type"]
-            if "lifespan" in animal["characteristics"]:
-                animal_data["Lifespan"] = animal["characteristics"]["lifespan"]
-        if "locations" in animal:
-            animal_data["Location"] = " and ".join(animal["locations"])
-        animals_data[animal["name"]] = animal_data
-    return animals_data
 
 
 def serialize_animal(animal_name, animal_data):
