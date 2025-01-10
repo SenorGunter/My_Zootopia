@@ -1,11 +1,10 @@
+from animal_api import api_data_load
 
-import json
 
-
-def load_data(file_path):
-    """ Loads JSON"""
-    with open(file_path, "r") as fileobj:
-        return json.load(fileobj)
+# def load_data(file_path):
+#     """ Loads JSON"""
+#     with open(file_path, "r") as fileobj:
+#         return json.load(fileobj)
 
 
 def load_html_template(file_path):
@@ -14,9 +13,9 @@ def load_html_template(file_path):
         return fileobj.read()
 
 
-def get_animals_data(skin_type):
+def get_animals_data(animal, skin_type):
     """ Returns a dictionary with the relevant data for each animal """
-    full_animals_data = load_data("animals_data.json")
+    full_animals_data = api_data_load(animal)
 
     animals_data = {}
     for animal in full_animals_data:
@@ -56,9 +55,13 @@ def serialize_animal(animal_name, animal_data):
     return html_output
 
 
-def get_possible_skin_types():
+def serialize_not_available_input(animal_name):
+    return  f'<p class="error">No animals available with the name"{animal_name}".</p>'
+
+
+def get_possible_skin_types(animal_input):
     """ Returns the possible skin types """
-    full_animals_data = load_data("animals_data.json")
+    full_animals_data = api_data_load(animal_input)
     skin_types = set()
     for animal in full_animals_data:
         if "characteristics" in animal and "skin_type" in animal["characteristics"]:
@@ -66,9 +69,17 @@ def get_possible_skin_types():
     return list(skin_types)
 
 
-def get_user_input():
+def get_user_animal():
+    while True:
+        user_input = input("Enter a animal")
+        if user_input.isalpha():
+            return user_input
+        print("Wrongful input")
+
+
+def get_user_skin(animal_input):
     """ Asks the user for the skin type """
-    skin_types = get_possible_skin_types()
+    skin_types = get_possible_skin_types(animal_input)
     print("Possible skin types:")
     print("All")
     for skin_type in skin_types:
@@ -86,13 +97,20 @@ def get_user_input():
 
 if __name__ == "__main__":
     new_html = load_html_template("animals_template.html")
-    skin_type = get_user_input()
-    animals_data = get_animals_data(skin_type)
+    animal_input = get_user_animal()
+    skintype_data = get_user_skin(animal_input)
+    animals_data = get_animals_data(animal_input, skintype_data)
 
     html_animals_data = ""
-    for animal_name, animal_data in animals_data.items():
-        html_animals_data += serialize_animal(animal_name, animal_data)
+    if animal_input in animals_data:
+        for animal_name, animal_data in animals_data.items():
+            html_animals_data += serialize_animal(animal_name, animal_data)
 
-    new_html = new_html.replace("__REPLACE_ANIMALS_INFO__", html_animals_data)
-    with open("animals.html", "w") as fileobj:
-        fileobj.write(new_html)
+        new_html = new_html.replace("__REPLACE_ANIMALS_INFO__", html_animals_data)
+        with open("animals.html", "w") as fileobj:
+            fileobj.write(new_html)
+    else:
+        new_html = serialize_not_available_input(animal_input)
+        new_html = new_html.replace("__REPLACE_ANIMALS_INFO__", html_animals_data)
+        with open("animals.html", "w") as fileobj:
+            fileobj.write(new_html)
