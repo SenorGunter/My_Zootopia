@@ -73,7 +73,7 @@ if __name__ == "__main__":
     animals_data = get_animals_data(animal_input, skintype_data)
 
     html_animals_data = ""
-    if animal_input in animals_data:
+    if animal_input.lower() in [animal.lower() for animal in animals_data]:
         for animal_name, animal_data in animals_data.items():
             html_animals_data += serialize_animal(animal_name, animal_data)
 
